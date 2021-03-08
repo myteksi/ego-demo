@@ -1,0 +1,25 @@
+# Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+#
+# Use of this source code is governed by the Apache License 2.0 that can be
+# found in the LICENSE file
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "httpfilter.go",
+        "registry.go",
+    ],
+    importpath = "github.com/grab/ego/ego/src/go",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ego/src/go/envoy:go_default_library",
+        "//ego/src/go/envoy/datastatus:go_default_library",
+        "//ego/src/go/envoy/headersstatus:go_default_library",
+        "//ego/src/go/envoy/loglevel:go_default_library",
+        "//ego/src/go/envoy/trailersstatus:go_default_library",
+        "//ego/src/go/logger:go_default_library",
+        "//ego/src/go/volatile:go_default_library",
+    ],
+)

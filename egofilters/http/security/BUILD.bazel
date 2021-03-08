@@ -1,0 +1,58 @@
+# Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+#
+# Use of this source code is governed by the Apache License 2.0 that can be
+# found in the LICENSE file
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "config.go",
+        "factory.go",
+        "filter.go",
+    ],
+    importpath = "github.com/grab/ego/egofilters/http/security",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ego/src/go:go_default_library",
+        "//ego/src/go/envoy:go_default_library",
+        "//ego/src/go/envoy/datastatus:go_default_library",
+        "//ego/src/go/envoy/headersstatus:go_default_library",
+        "//ego/src/go/envoy/lifespan:go_default_library",
+        "//ego/src/go/envoy/statetype:go_default_library",
+        "//ego/src/go/envoy/trailersstatus:go_default_library",
+        "//ego/src/go/logger:go_default_library",
+        "//egofilters/http/security/context:go_default_library",
+        "//egofilters/http/security/proto:go_default_library",
+        "//egofilters/http/security/verifier:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "config_test.go",
+        "factory_test.go",
+        "filter_sign_test.go",
+        "filter_verify_test.go",
+    ],
+    embed = [":go_default_library"],
+    deps = [
+        "//ego/src/go/envoy/datastatus:go_default_library",
+        "//ego/src/go/envoy/headersstatus:go_default_library",
+        "//ego/src/go/envoy/trailersstatus:go_default_library",
+        "//ego/src/go/volatile:go_default_library",
+        "//ego/test/go/mock:go_default_library",
+        "//ego/test/go/mock/gen/envoy:go_default_library",
+        "//egofilters/http/security/context:go_default_library",
+        "//egofilters/http/security/proto:go_default_library",
+        "//egofilters/http/security/verifier:go_default_library",
+        "//egofilters/mock/gen/http/security/verifier:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@com_github_stretchr_testify//mock:go_default_library",
+        "@com_github_stretchr_testify//require:go_default_library",
+    ],
+)

@@ -1,0 +1,23 @@
+# Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+#
+# Use of this source code is governed by the Apache License 2.0 that can be
+# found in the LICENSE file
+
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@envoy//bazel:envoy_build_system.bzl",
+    "envoy_cc_test",
+)
+
+envoy_cc_test(
+    name = "goc_test",
+    srcs = [
+        "requestheadermap_test.cc",
+    ],
+    repository = "@envoy",
+    deps = [
+        "//ego/src/cc/goc:goc",
+        "@envoy//test/test_common:utility_lib",
+    ],
+)

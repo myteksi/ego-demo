@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "get_current_time_opt.go",
+        "is_valid_hmac_signature_opt.go",
+        "signer.go",
+        "verifier.go",
+    ],
+    importpath = "github.com/grab/ego/egofilters/mock/gen/http/security/verifier",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ego/src/go/envoy:go_default_library",
+        "//egofilters/http/security/context:go_default_library",
+        "@com_github_stretchr_testify//mock:go_default_library",
+    ],
+)

@@ -1,0 +1,24 @@
+// Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+//
+// Use of this source code is governed by the Apache License 2.0 that can be
+// found in the LICENSE file
+
+syntax = "proto3";
+
+package ego.http;
+
+import "validate/validate.proto";
+
+// TODO: will check replace it by HeaderMap below
+message RequestHeaderMap {
+  repeated HeaderEntry headers = 1;
+}
+
+message ResponseHeaderMap {
+  repeated HeaderEntry headers = 1;
+}
+
+message HeaderEntry {
+  string key = 1;
+  string value = 2;
+}

@@ -1,0 +1,25 @@
+diff --git a/gomockery.bzl b/gomockery.bzl
+--- a/gomockery.bzl
++++ b/gomockery.bzl
+@@ -83,7 +83,7 @@ def _go_mockery_impl(ctx):
+         ),
+     ]
+
+-_go_mockery = go_rule(
++_go_mockery = rule(
+     _go_mockery_impl,
+     attrs = {
+         "src": attr.label(
+@@ -127,7 +127,11 @@ _go_mockery = go_rule(
+             cfg = "host",
+             mandatory = False,
+         ),
+-    }
++	"_go_context_data": attr.label(
++            default = "@io_bazel_rules_go//:go_context_data",
++        ),
++    },
++    toolchains = ["@io_bazel_rules_go//go:toolchain"],
+ )
+
+ def _go_tool_run_shell_stdout(ctx, cmd, args, extra_inputs, outputs):

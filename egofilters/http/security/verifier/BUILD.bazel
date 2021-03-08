@@ -1,0 +1,50 @@
+# Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+#
+# Use of this source code is governed by the Apache License 2.0 that can be
+# found in the LICENSE file
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "base_provider.go",
+        "consts.go",
+        "custom_hmac_provider.go",
+        "custom_hmac_validator.go",
+        "verifier.go",
+    ],
+    importpath = "github.com/grab/ego/egofilters/http/security/verifier",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ego/src/go/envoy:go_default_library",
+        "//egofilters/http/security/context:go_default_library",
+        "//egofilters/http/security/http:go_default_library",
+        "//egofilters/http/security/proto:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "custom_hmac_provider_factory_test.go",
+        "custom_hmac_provider_sign_required_test.go",
+        "custom_hmac_provider_sign_test.go",
+        "custom_hmac_provider_verify_test.go",
+        "custom_hmac_validator_test.go",
+    ],
+    embed = [":go_default_library"],
+    deps = [
+        "//ego/src/go/logger:go_default_library",
+        "//ego/src/go/volatile:go_default_library",
+        "//ego/test/go/mock:go_default_library",
+        "//ego/test/go/mock/gen/envoy:go_default_library",
+        "//egofilters/http/security/context:go_default_library",
+        "//egofilters/http/security/proto:go_default_library",
+        "//egofilters/mock/gen/http/security/context:go_default_library",
+        "//egofilters/mock/gen/http/security/http:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@com_github_stretchr_testify//mock:go_default_library",
+        "@com_github_stretchr_testify//require:go_default_library",
+    ],
+)

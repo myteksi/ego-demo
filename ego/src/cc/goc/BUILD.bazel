@@ -1,0 +1,40 @@
+# Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+#
+# Use of this source code is governed by the Apache License 2.0 that can be
+# found in the LICENSE file
+
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@envoy//bazel:envoy_build_system.bzl",
+    "envoy_cc_library",
+    "envoy_cc_test",
+)
+
+# :goc contains code that is called from Go ("downcalls"). We need to separate
+# this from the code that calls Go ("upcalls") in order to avoid circular deps.
+#
+envoy_cc_library(
+    name = "goc",
+    srcs = [
+        "bufferinstance.cc",
+        "goc.cc",
+        "gohttpfilter.cc",
+        "log.cc",
+        "requestheadermap.cc",
+        "responseheadermap.cc",
+        "requesttrailermap.cc",
+        "stats.cc",
+    ],
+    hdrs = [
+        "goc.h",
+        "envoy.h",
+    ],
+    repository = "@envoy",
+    deps = [
+        "//ego/src/cc/filter/http:goc",
+        "//ego/src/cc/goc/proto:pkg_cc_proto",
+        "@envoy//include/envoy/http:filter_interface",
+        "@envoy//source/common/router:string_accessor_lib",
+    ],
+)

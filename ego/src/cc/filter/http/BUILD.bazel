@@ -1,0 +1,118 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+
+# gazelle:ignore
+
+# Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+#
+# Use of this source code is governed by the Apache License 2.0 that can be
+# found in the LICENSE file
+
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@envoy//bazel:envoy_build_system.bzl",
+    "envoy_cc_binary",
+    "envoy_cc_library",
+    "envoy_cc_test",
+)
+load(
+    "@envoy_api//bazel:api_build_system.bzl",
+    "api_proto_package",
+)
+load(
+    "@envoy//test/extensions:extensions_build_system.bzl",
+    "envoy_extension_cc_test",
+)
+
+api_proto_package(
+    deps = [
+        "@envoy_api//envoy/extensions/transport_sockets/tls/v3:pkg",
+    ],
+)
+
+# :native contains code that does not (directly or indirectly) interact with Go
+# This library is referenced by the Go code (so that we avoid circular deps)
+envoy_cc_library(
+    name = "native",
+    srcs = [
+        "filter-native.cc",
+        "native.cc",
+        "span-group.cc",
+    ],
+    hdrs = [
+        "filter.h",
+        "cgo-proxy.h",
+        "span-group.h",
+    ],
+    repository = "@envoy",
+    deps = [
+        ":pkg_cc_proto",
+        "@envoy//source/exe:envoy_common_lib",
+    ],
+)
+
+# :cgo contains code that directly or indirectly interacts with Go, or code
+# that is only needed by such code. Don't reference this from the Go packages
+# as this may create circular dependencies.
+envoy_cc_library(
+    name = "cgo",
+    srcs = [
+        "filter-cgo.cc",
+        "cgo-proxy.cc",
+    ],
+    repository = "@envoy",
+    deps = [
+        ":native",
+        "//ego/src/go/internal/cgo:cgo.cc",
+        "//ego/src/cc/goc:goc",
+    ],
+)
+
+# :goc contains code that is called from Go ("downcalls"). We need to separate
+# this from the code that calls Go ("upcalls") in order to avoid circular deps.
+# There is one circle here which is created by a downcall that needs to trigger
+# an upcall. This has been decoupled for the compiler by wrapping the upcall in
+# a virtual function.
+envoy_cc_library(
+    name = "goc",
+    srcs = [
+        "filter-goc.cc",
+    ],
+    hdrs = [
+        "filter.h",
+    ],
+    repository = "@envoy",
+    deps = [
+        ":native",
+        # ":cgo", we're not declaring post->onPost dependency, but that's fine.
+        ":pkg_cc_proto",
+        "@envoy//source/exe:envoy_common_lib",
+    ],
+)
+
+# :factory contains everything needed by the filter factory. Typically pulled
+# in by top-level packages
+envoy_cc_library(
+    name = "factory",
+    srcs = ["factory.cc"],
+    repository = "@envoy",
+    deps = [
+        ":cgo",
+        ":native",
+        "@envoy//include/envoy/server:filter_config_interface",
+    ],
+)
+
+# :integration_test can be used to conveniently run the integration tests:
+# `bazel test //src/cc/filter/http/getheader:integration_test`
+# envoy_cc_test(
+#     name = "integration_test",
+#     srcs = ["integration_test.cc"],
+#     repository = "@envoy",
+#     deps = [
+#         ":factory",
+#         ":native",
+#         "@envoy//test/integration:http_integration_lib",
+#     ],
+# )

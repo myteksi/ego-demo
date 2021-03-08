@@ -1,0 +1,40 @@
+# Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+#
+# Use of this source code is governed by the Apache License 2.0 that can be
+# found in the LICENSE file
+
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@envoy//bazel:envoy_build_system.bzl",
+    "envoy_cc_mock",
+)
+
+load(
+    ":linkopts.bzl",
+    "ego_cc_test",
+)
+
+ego_cc_test(
+    name = "http_filter_test",
+    srcs = [
+        "filter_test.cc",
+        "span-group_test.cc",
+    ],
+    repository = "@envoy",
+    deps = [
+        ":cgo_proxy_mocks",
+        "//ego/src/cc/filter/http:cgo",
+        "//ego/src/cc/filter/http:factory",
+        "//ego/src/cc/filter/http:native",
+        "//egofilters/http/getheader/proto:pkg_cc_proto",
+        "//egofilters/http/security/proto:pkg_cc_proto",
+        "@envoy//test/mocks/http:http_mocks",
+    ],
+)
+
+envoy_cc_mock(
+    name = "cgo_proxy_mocks",
+    hdrs = ["mocks.h"],
+    repository = "@envoy",
+)

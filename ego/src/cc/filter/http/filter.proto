@@ -1,0 +1,61 @@
+// Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+//
+// Use of this source code is governed by the Apache License 2.0 that can be
+// found in the LICENSE file
+
+syntax = "proto3";
+
+package ego.http;
+
+import "validate/validate.proto";
+import "google/protobuf/any.proto";
+import "envoy/extensions/transport_sockets/tls/v3/cert.proto";
+
+message Settings {
+
+  // The filter name used with ego.RegisterHttpFilter
+  string filter = 1 [(validate.rules).string.min_bytes = 1];
+
+  // For bools, the default value is false. so if it available it should be true
+  // And it will be generated with crash_on_errors = true in envoy.yaml for
+  // testing, canary deploy to let Envoy crash by throwing an exception
+  bool crash_on_errors = 2;
+
+  // An Any that must match the structure expected by the respective filter.
+  // usually annotated with a @type attribute to avoid accidents.
+  google.protobuf.Any settings = 3;
+
+  // We support access to SDS via the envoy runtime, so here is where the
+  // coordinates for the secrets needed by the filter can be configured. See
+  // https://github.com/envoyproxy/envoy/blob/v1.14.1/api/envoy/api/v2/auth/cert.proto
+  // (message SdsSecretConfig) for more information.
+  //
+  // Example 1: remote SDS
+  // ---
+  // sds_config:
+  //   api_config_source:
+  //     api_type: GRPC
+  //     grpc_services:
+  //       envoy_grpc:
+  //         cluster_name: sds_server_uds
+  //
+  // Example 2: static file; this can not be configured via dynamic resources
+  // ---
+  // sds_config:
+  //   path: ./test/secret-resource.yaml
+  //
+  // Example 3: static resources, leave sds_config empty
+  // ---
+  // static_resources:
+  //   secrets:
+  //     - name: "/ego-demo/v1/secret"
+  //       generic_secret:
+  //         secret:
+  //            inline_string: <SECRET_STRING>
+  //
+  envoy.extensions.transport_sockets.tls.v3.SdsSecretConfig sds_secret_config = 4;
+}
+
+message SettingsPerRoute {
+  map<string, google.protobuf.Any> filters = 1;
+}

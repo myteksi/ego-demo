@@ -1,0 +1,75 @@
+// Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+//
+// Use of this source code is governed by the Apache License 2.0 that can be
+// found in the LICENSE file
+
+syntax = "proto3";
+
+package ego.security;
+
+import "validate/validate.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+
+message Settings {
+  map<string, Provider> providers = 1 [ (validate.rules).map.min_pairs = 1 ];
+}
+
+// This message specifies a provider.
+message Provider {
+  oneof provider_type {
+    CustomHMACProvider custom_hmac_provider = 1;
+    // add other providers
+  }
+}
+
+// A CustomHMACProvider message specifies the information will use to verify
+// HMAC signature
+message CustomHMACProvider {
+  string request_validation_url = 1 [ (validate.rules).string = {min_bytes : 1} ];
+  string response_signing_url = 2 [ (validate.rules).string = {} ];
+  // A bit redundant here we will improve it with SecretManagement later
+  string service_key = 3 [ (validate.rules).string = {min_bytes : 1} ];
+  string service_token = 4 [ (validate.rules).string = {min_bytes : 1} ];
+  repeated string generated_upstream_headers = 5[
+    (validate.rules).repeated.unique = true,
+    (validate.rules).repeated.items.string = {in: [
+      "x-custom-userid"
+      ]}];
+  bool sign_resp = 6;
+  bool tracing_enabled = 7;
+}
+
+// This message specifies a requirement. An empty message means verification
+// is not required.
+message Requirement {
+  oneof requires_type {
+    // Specify a required provider name.
+    string provider_name = 1;
+
+    // Specify list of Requirement. Their results are OR-ed.
+    // If any one of them passes, the result is passed.
+    RequirementOrList requires_any = 2;
+
+    // Specify list of Requirement. Their results are AND-ed.
+    // All of them must pass, if one of them fails or missing, it fails.
+    RequirementAndList requires_all = 3;
+  }
+}
+
+// This message specifies a list of RequiredProvider.
+// Their results are OR-ed; if any one of them passes, the result is passed
+message RequirementOrList {
+  // Specify a list of Requirement.
+  repeated Requirement requirements = 1
+      [ (validate.rules).repeated = {min_items : 2} ];
+}
+
+// This message specifies a list of RequiredProvider.
+// Their results are AND-ed; all of them must pass, if one of them fails or
+// missing, it fails.
+message RequirementAndList {
+  // Specify a list of Requirement.
+  repeated Requirement requirements = 1
+      [ (validate.rules).repeated = {min_items : 2} ];
+}

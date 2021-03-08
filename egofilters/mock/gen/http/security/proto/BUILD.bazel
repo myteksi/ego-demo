@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "is_provider__provider_type.go",
+        "is_requirement__requires_type.go",
+    ],
+    importpath = "github.com/grab/ego/egofilters/mock/gen/http/security/proto",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_stretchr_testify//mock:go_default_library"],
+)

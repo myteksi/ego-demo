@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "callbacks.go",
+        "context.go",
+        "request_context.go",
+        "response_callbacks.go",
+        "response_context.go",
+    ],
+    importpath = "github.com/grab/ego/egofilters/mock/gen/http/security/context",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ego/src/go/envoy:go_default_library",
+        "//ego/src/go/logger:go_default_library",
+        "//egofilters/http/security/context:go_default_library",
+        "@com_github_stretchr_testify//mock:go_default_library",
+    ],
+)

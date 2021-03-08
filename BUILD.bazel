@@ -1,0 +1,48 @@
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@envoy//bazel:envoy_build_system.bzl",
+    "envoy_cc_binary",
+    "envoy_cc_library",
+    "envoy_cc_test",
+)
+
+envoy_cc_binary(
+    name = "envoy",
+    repository = "@envoy",
+    linkopts = select({
+        "@bazel_tools//src/conditions:darwin": ["-framework Security"],
+        "//conditions:default": [],
+    }),
+    deps = [
+        "//egofilters:ego_filter_protos",
+        "//ego/src/cc/filter/http:factory",
+        "//ego/src/cc/goc:goc",
+        "@envoy//source/exe:envoy_main_entry_lib",
+    ],
+)
+
+sh_test(
+    name = "ego-demo",
+    srcs = [
+        "ego-demo.sh",
+    ],
+    data = [
+        "//:envoy.yaml",
+        "//:envoy",
+        "//services/echo:echo",
+        "//services/hmac:hmac",
+    ],
+)
+
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+# Exclude vscode history plugin folder ;-)
+# gazelle:exclude .history
+# gazelle:exclude envoy
+# gazelle:exclude tools
+
+# gazelle:prefix github.com/grab/ego
+
+# run gazelle to udate bazel build files
+gazelle(name = "gazelle")

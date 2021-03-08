@@ -1,0 +1,86 @@
+# Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+#
+# Use of this source code is governed by the Apache License 2.0 that can be
+# found in the LICENSE file
+
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+# Maintained by Gazelle. The only customisation is
+# `cdeps = ["//ego/src/cc/cgo:native"]`,  which gives us access to the downcall
+# proxies and header file ("//ego/src/cc/cgo/envoy.h").
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "bufferinstance.go",
+        "clutch.go",
+        "cutils.go",
+        "decoder_callbacks.go",
+        "encoder_callbacks.go",
+        "filter_state.go",
+        "gohttpfilter.go",
+        "gohttpfilterconfig.go",
+        "logger.go",
+        "main.go",
+        "requestheadermap.go",
+        "requesttrailermap.go",
+        "responseheadermap.go",
+        "route.go",
+        "span.go",
+        "stats.go",
+        "stream_info.go",
+    ],
+    cdeps = ["//ego/src/cc/goc:goc"],
+    cgo = True,
+    importpath = "github.com/grab/ego/ego/src/go/internal/cgo",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//ego/src/cc/goc/proto:go_default_library",
+        "//ego/src/go:go_default_library",
+        "//ego/src/go/envoy:go_default_library",
+        "//ego/src/go/envoy/datastatus:go_default_library",
+        "//ego/src/go/envoy/headersstatus:go_default_library",
+        "//ego/src/go/envoy/lifespan:go_default_library",
+        "//ego/src/go/envoy/loglevel:go_default_library",
+        "//ego/src/go/envoy/statetype:go_default_library",
+        "//ego/src/go/envoy/stats:go_default_library",
+        "//ego/src/go/envoy/trailersstatus:go_default_library",
+        "//ego/src/go/logger:go_default_library",
+        "//ego/src/go/volatile:go_default_library",
+        "//egofilters:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+    ],
+)
+
+# :cgo contains the Go portions of our envoy extensions.
+go_binary(
+    name = "cgo",
+    cdeps = [
+        "//ego/src/cc/goc:goc",
+    ],
+    embed = [":go_default_library"],
+    linkmode = "c-archive",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["clutch_test.go"],
+    embed = [":go_default_library"],
+    importpath = "github.com/grab/ego/ego/src/go/internal/cgo",
+    deps = [
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_clutch_test",
+    srcs = [
+        "clutch.go",
+        "clutch_test.go",
+    ],
+    cgo = True,
+    importpath = "github.com/grab/ego/ego/src/go/internal/cgo",
+    deps = [
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ],
+)

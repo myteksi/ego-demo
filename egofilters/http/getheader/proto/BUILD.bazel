@@ -1,0 +1,40 @@
+# Copyright 2020-2021 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+#
+# Use of this source code is governed by the Apache License 2.0 that can be
+# found in the LICENSE file
+
+# gazelle:ignore
+
+load("@io_bazel_rules_go//proto:compiler.bzl", "go_proto_compiler")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+load("@envoy_api//bazel:api_build_system.bzl", "api_proto_package")
+
+# This is generate proto for C-Side when we embeded in envoy config
+api_proto_package()
+
+# This is generate validation file
+go_proto_compiler(
+    name = "pgv_plugin_go",
+    options = ["lang=go"],
+    plugin = "@com_envoyproxy_protoc_gen_validate//:protoc-gen-validate",
+    suffix = ".pb.validate.go",
+    valid_archive = False,
+)
+
+# This is generate proto for G-Side usage
+go_proto_library(
+    name = "go_default_library",
+    compilers = [
+        "@io_bazel_rules_go//proto:go_proto",
+        "pgv_plugin_go",
+    ],
+    importpath = "github.com/grab/ego/egofilters/http/getheader/proto",
+    proto = ":pkg",  # api_proto_package() generates this
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_envoyproxy_protoc_gen_validate//validate:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@com_github_golang_protobuf//ptypes/any:go_default_library",
+        "@com_google_googleapis//google/api:annotations_go_proto",
+    ],
+)
